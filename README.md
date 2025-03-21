@@ -11,7 +11,7 @@ A modern microservices-based task management system with authentication, project
   - [Project-Service](#Project-Service-Port-3003)
   - [Task-Service](#Task-Service-Port-3004)
 - [Technologies Used](#Technologies-Used)
-- [Setup Instructions](#usage-examples)
+- [Setup Instructions](#Setup-Instructions)
   - [Prerequisites](#Prerequisites)
   - [Installation](#Installation)
 - [API Documentation](#API-Documentation)
