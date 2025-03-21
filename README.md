@@ -198,35 +198,6 @@ The system includes several middleware functions:
 - `authenticateToken`: Validates JWT token
 - `userAdmin`: Ensures the user has admin privileges
 
-## Models
-
-### User Model
-- name: String
-- email: String (unique)
-- password: String (hashed)
-- role: String (admin/user)
-- isBlocked: Boolean
-
-### Project Model
-- name: String
-- description: String
-- startDate: Date
-- endDate: Date
-- status: String
-- categories: Array of Strings
-- createdBy: Object (user reference)
-
-### Task Model
-- title: String
-- description: String
-- priority: String
-- deadline: Date
-- status: String
-- assignedTo: Object (user reference)
-- projectId: ID (project reference)
-- comments: Array of Objects
-- attachments: Array of Objects
-
 ## Postman Collections
 
 To help you test the APIs, you can import the following Postman collections:
