@@ -58,5 +58,5 @@ app.get('/messages/:projectId', async (req, res) => {
 
 const PORT = process.env.PORT || 3003;
 server.listen(PORT, () => {
-    console.log(`🚀 Serveur de collaboration sur http://localhost:${PORT}`);
+    console.log(`Serveur de collaboration sur http://localhost:${PORT}`);
 });
