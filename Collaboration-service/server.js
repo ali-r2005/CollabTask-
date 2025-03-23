@@ -4,7 +4,6 @@ const http = require('http');
 const { Server } = require('socket.io');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const amqp = require('amqplib');
 
 const app = express();
 const server = http.createServer(app);
@@ -22,7 +21,6 @@ mongoose.connect(process.env.MONGO_URI).then(() => console.log("MongoDB connectÃ
 
 const Message = require('./models/Message');
 
-
 io.on('connection', (socket) => {
     console.log(`Utilisateur connectÃ© : ${socket.id}`);
 
@@ -36,10 +34,7 @@ io.on('connection', (socket) => {
         socket.join(projectId);
         const message = new Message({ sender, projectId, content });
         await message.save();
-
-        io.to(projectId).emit('receiveMessage', message);
-
-        
+        io.to(projectId).emit('receiveMessage', message);      
     });
 
     socket.on('disconnect', () => {
