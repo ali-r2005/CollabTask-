@@ -20,7 +20,7 @@ io.on("connection", (socket) => {
 });
 
 const sendNotification = (message,projectId) => {
-  socket.to(projectId).emit("notification", message);
+  io.to(projectId).emit("notification", message);
 };
 
 router.get('/reminders', authenticateToken, async (req, res) => {
