@@ -1,7 +1,3 @@
-Here's how you can update your README file to include the new Collaboration Service with real-time messaging and notifications using Socket.IO:
-
----
-
 ## Task Management System
 
 A modern microservices-based task management system with authentication, project management, task tracking, and real-time collaboration capabilities.
