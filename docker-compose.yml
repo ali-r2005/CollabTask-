@@ -1,0 +1,119 @@
+version: '3.8'
+
+services:
+  mongo:
+    image: mongo:latest
+    container_name: mongo_db
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - app-network
+
+  auth-service:
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
+    container_name: auth-service
+    ports:
+      - "3001:3001"
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/task_db
+      - PORT=3001
+      - JWT_SECRET=like_that
+    depends_on:
+      - mongo
+    networks:
+      - app-network
+    volumes:
+      - ./auth-service:/usr/src/app
+    command: npm start
+
+  collaboration-service:
+    build:
+      context: ./collaboration-service
+      dockerfile: Dockerfile
+    container_name: collaboration-service
+    ports:
+      - "3003:3003"
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/task_db
+      - PORT=3003
+    depends_on:
+      - mongo
+    networks:
+      - app-network
+    volumes:
+      - ./collaboration-service:/usr/src/app
+    command: npm start
+
+  project-service:
+    build:
+      context: ./project-service
+      dockerfile: Dockerfile
+    container_name: project-service
+    ports:
+      - "3002:3002"
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/task_db
+      - PORT=3002
+      - JWT_SECRET=like_that
+    depends_on:
+      - mongo
+      - auth-service
+    networks:
+      - app-network
+    volumes:
+      - ./project-service:/usr/src/app
+    command: npm start
+
+  task-service:
+    build:
+      context: ./task-service
+      dockerfile: Dockerfile
+    container_name: task-service
+    ports:
+      - "3005:3005"
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/task_db
+      - PORT=3005
+      - JWT_SECRET=like_that
+    depends_on:
+      - mongo
+      - auth-service
+      - project-service
+      - collaboration-service 
+    networks:
+      - app-network
+    volumes:
+      - ./task-service:/usr/src/app
+      - ./task-service/uploads:/usr/src/app/uploads
+    command: npm start
+
+  reports-service:
+    build:
+      context: ./reports-service
+      dockerfile: Dockerfile
+    container_name: reports-service
+    ports:
+      - "3004:3004"
+    environment:
+      - PORT=3004
+      - JWT_SECRET=like_that
+    depends_on:
+      - task-service
+      - project-service
+      - auth-service
+    networks:
+      - app-network
+    volumes:
+      - ./reports-service:/usr/src/app
+    command: npm start
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mongo_data:

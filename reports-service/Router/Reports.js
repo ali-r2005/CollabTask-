@@ -7,15 +7,17 @@ const TASK_SERVICE_URL = 'http://localhost:3005';
 const PROJECT_SERVICE_URL = 'http://localhost:3003';
 
 const fetchWithToken = async (url, token) => {
-  const response = await axios.get(url, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+
+    const response = await axios.get(url, {
+      headers: { Authorization: `${token}` },
+    });
+
   return response.data;
 };
 
 router.get('/project-progress', authenticateToken, async (req, res) => {
   try {
-    const token = req.header('Authorization').split(' ')[1];
+    const token = req.header('Authorization');        
     const projects = await fetchWithToken(`${PROJECT_SERVICE_URL}/projects`, token);
     const tasks = await fetchWithToken(`${TASK_SERVICE_URL}/tasks`, token);
 
@@ -46,7 +48,7 @@ router.get('/project-progress', authenticateToken, async (req, res) => {
 // User Workload Report
 router.get('/user-workload', authenticateToken, async (req, res) => {
   try {
-    const token = req.header('Authorization').split(' ')[1];
+    const token = req.header('Authorization');
     const tasks = await fetchWithToken(`${TASK_SERVICE_URL}/tasks`, token);
     const workload = {};
 
@@ -74,7 +76,7 @@ router.get('/user-workload', authenticateToken, async (req, res) => {
 
 router.get('/task-priority-distribution', authenticateToken, async (req, res) => {
   try {
-    const token = req.header('Authorization').split(' ')[1];
+    const token = req.header('Authorization')
     const tasks = await fetchWithToken(`${TASK_SERVICE_URL}/tasks`, token);
     const distribution = {
       low: 0,
@@ -94,7 +96,7 @@ router.get('/task-priority-distribution', authenticateToken, async (req, res) =>
 
 router.get('/task-user-distribution', authenticateToken, async (req, res) => {
   try {
-    const token = req.header('Authorization').split(' ')[1];
+    const token = req.header('Authorization')
     const tasks = await fetchWithToken(`${TASK_SERVICE_URL}/tasks`, token);
     const distribution = {};
 

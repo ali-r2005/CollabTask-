@@ -6,7 +6,7 @@ const {authenticateToken} = require("../Middleware/Auth")
 const axios = require("axios")
 
 // Get Project (name, Sdate, Edate, status)
-router.get("/", authenticateToken, async (req, res) => {
+router.get("/", authenticateToken, async (req, res) => {    
     try {
         let filter = {};
         

@@ -8,7 +8,7 @@ const upload = multer({ dest: 'uploads/' });
 const socket = require("socket.io-client")
 
 const sendNotification = (message, projectId) => {
-  const newSocket = socket.io("http://localhost:3002");
+  const newSocket = socket.io("http://collaboration-service:3002");
   newSocket.emit("sendNotification", {message, projectId});
 };
 
