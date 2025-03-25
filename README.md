@@ -1,7 +1,6 @@
+## Task Management System
 
-# Task Management System
-
-A modern microservices-based task management system with authentication, project management, and task tracking capabilities.
+A modern microservices-based task management system with authentication, project management, task tracking, and real-time collaboration capabilities.
 
 ## Table of Contents
 - [Overview](#Overview)
@@ -10,6 +9,7 @@ A modern microservices-based task management system with authentication, project
   - [Authentication-Service](#Authentication-Service-Port-3001)
   - [Project-Service](#Project-Service-Port-3003)
   - [Task-Service](#Task-Service-Port-3004)
+  - [Collaboration-Service](#Collaboration-Service-Port-3002)
 - [Technologies Used](#Technologies-Used)
 - [Setup Instructions](#Setup-Instructions)
   - [Prerequisites](#Prerequisites)
@@ -21,29 +21,30 @@ A modern microservices-based task management system with authentication, project
 
 ## Overview
 
-This project is a complete task management solution built using a microservices architecture. It consists of three main services:
+This project is a complete task management solution built using a microservices architecture. It now includes four main services:
 
 1. **Authentication Service** - Handles user registration, login, and user management
 2. **Project Service** - Manages projects, their lifecycle, and categorization
 3. **Task Service** - Handles task creation, assignment, status updates, and attachments
+4. **Collaboration Service** - Provides real-time messaging and notifications for project collaboration
 
-Each service operates independently with its own database connections while communicating with each other through REST APIs.
+Each service operates independently with its own database connections while communicating through REST APIs or WebSocket events.
 
 ## Architecture
 
 ```
-┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│                 │     │                 │     │                 │
-│  Auth Service   │◄────►  Project Service│◄────►   Task Service  │
-│    (Port 3001)  │     │    (Port 3003)  │     │    (Port 3004)  │
-│                 │     │                 │     │                 │
-└────────┬────────┘     └────────┬────────┘     └────────┬────────┘
-         │                       │                       │
-         │                       │                       │
-         ▼                       ▼                       ▼
-    ┌─────────────────────────────────────────────────────────┐
-    │                        MongoDB                          │
-    └─────────────────────────────────────────────────────────┘
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│                 │     │                 │     │                 │     │                 │
+│  Auth Service   │◄────►  Project Service│◄────►   Task Service  │◄────► Collaboration   │
+│    (Port 3001)  │     │    (Port 3003)  │     │    (Port 3004)  │     │ Service (3002)  │
+│                 │     │                 │     │                 │     │                 │
+└────────┬────────┘     └────────┬────────┘     └────────┬────────┘     └────────┬────────┘
+         │                       │                       │                       │
+         │                       │                       │                       │
+         ▼                       ▼                       ▼                       ▼
+    ┌──────────────────────────────────────────────────────────────────────────────────┐
+    │                                MongoDB                                           │
+    └──────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ## Services
@@ -75,6 +76,15 @@ Handles task management functionality:
 - Task commenting
 - Deadline management and reminders
 
+### Collaboration Service (Port 3002)
+
+Provides real-time collaboration features:
+- Real-time messaging within projects
+- Project-specific notifications
+- WebSocket-based communication using Socket.IO
+- Message persistence in MongoDB
+- Historical message retrieval
+
 ## Technologies Used
 
 - **Backend**: Node.js, Express.js
@@ -82,6 +92,7 @@ Handles task management functionality:
 - **Authentication**: JWT (JSON Web Tokens), bcryptjs
 - **File Handling**: Multer
 - **HTTP Client**: Axios for inter-service communication
+- **Real-time Communication**: Socket.IO (Collaboration Service)
 - **Environment Variables**: dotenv for configuration
 
 ## Setup Instructions
@@ -105,7 +116,7 @@ Handles task management functionality:
    ```
    MONGO_URI=your_mongodb_connection_string
    PORT=service_port_number
-   JWT_SECRET=your_jwt_secret_key
+   JWT_SECRET=your_jwt_secret_key  # Only for Auth Service
    ```
 
 3. Install dependencies for each service:
@@ -120,6 +131,10 @@ Handles task management functionality:
    
    # Task Service
    cd ../task-service
+   npm install
+   
+   # Collaboration Service
+   cd ../collaboration-service
    npm install
    ```
 
@@ -138,9 +153,65 @@ Handles task management functionality:
    # Task Service
    cd task-service
    npm start
+   
+   # Collaboration Service
+   cd collaboration-service
+   npm start
    ```
 
 ## API Documentation
+
+### Collaboration Service (Port 3002)
+
+#### REST Endpoints
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|--------------|
+| GET | /messages/:projectId | Retrieve all messages for a project | No (Add JWT for production) |
+
+#### WebSocket Events
+
+| Event | Direction | Payload | Description |
+|-------|-----------|---------|-------------|
+| connection | Server | - | User connects to the server |
+| joinProject | Client → Server | projectId (string) | Join a project room |
+| sendMessage | Client → Server | { sender: string, projectId: string, content: string } | Send a message to a project |
+| receiveMessage | Server → Client | { sender: string, projectId: string, content: string, _id: string, createdAt: Date } | Receive a message in real-time |
+| sendNotification | Client → Server | { message: string, projectId: string } | Send a notification to a project |
+| receiveNotification | Server → Client | { message: string, projectId: string } | Receive a notification in real-time |
+| disconnect | Server | - | User disconnects from the server |
+
+#### Example Client Implementation
+
+```javascript
+const socket = io('http://localhost:3002');
+
+// Join a project
+socket.emit('joinProject', 'project123');
+
+// Send a message
+socket.emit('sendMessage', {
+  sender: 'user1',
+  projectId: 'project123',
+  content: 'Hello team!'
+});
+
+// Send a notification
+socket.emit('sendNotification', {
+  projectId: 'project123',
+  message: 'Task deadline approaching!'
+});
+
+// Listen for messages
+socket.on('receiveMessage', (message) => {
+  console.log('New message:', message);
+});
+
+// Listen for notifications
+socket.on('receiveNotification', (notification) => {
+  console.log('New notification:', notification);
+});
+```
 
 ### Authentication Service
 
@@ -170,8 +241,6 @@ Handles task management functionality:
 
 ### Task Service
 
-#### Task Endpoints
-
 | Method | Endpoint | Description | Auth Required |
 |--------|----------|-------------|--------------|
 | GET | /tasks | Get all tasks with optional filters | Yes (Token) |
@@ -185,22 +254,52 @@ Handles task management functionality:
 
 ## Authentication Flow
 
-The system uses JWT-based authentication:
+The system uses JWT-based authentication for REST APIs. The Collaboration Service currently has no authentication for WebSocket connections (consider adding JWT verification in production).
 
 1. User registers or logs in through the Auth Service
 2. Auth Service provides a JWT token
-3. Client includes this token in the Authorization header for subsequent requests
+3. Client includes this token in the Authorization header for REST requests
 4. Other services verify the token through middleware
+5. WebSocket connections can be secured by passing the JWT token during connection
 
 ## Middleware
 
 The system includes several middleware functions:
-- `authenticateToken`: Validates JWT token
-- `userAdmin`: Ensures the user has admin privileges
+- `authenticateToken`: Validates JWT token (Auth, Project, Task Services)
+- `userAdmin`: Ensures the user has admin privileges (Auth Service)
+- Consider adding Socket.IO middleware for JWT validation in Collaboration Service
 
 ## Postman Collections
-
 To help you test the APIs, you can import the following Postman collections:
+
+### Collaboration Service Collection
+```json
+{
+  "info": {
+    "name": "Collaboration Service",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get Project Messages",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3002/messages/project123",
+          "host": "localhost:3002",
+          "path": [
+            "messages",
+            "project123"
+          ]
+        },
+        "description": "Retrieve all messages for a specific project."
+      },
+      "response": []
+    }
+  ]
+}
+```
 
 ### Auth Service Collection
 
@@ -806,6 +905,8 @@ To help you test the APIs, you can import the following Postman collections:
   ]
 }
 ```
+
+---
 
 ## How to Import Postman Collections
 
