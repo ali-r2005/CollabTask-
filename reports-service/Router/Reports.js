@@ -3,8 +3,8 @@ const router = express.Router();
 const axios = require('axios');
 const { authenticateToken } = require('../Middleware/Auth');
 
-const TASK_SERVICE_URL = 'http://localhost:3005';
-const PROJECT_SERVICE_URL = 'http://localhost:3003';
+const TASK_SERVICE_URL = process.env.TASK_SERVICE_URL || 'http://localhost:3005';
+const PROJECT_SERVICE_URL = process.env.PROJECT_SERVICE_URL || 'http://localhost:3003';
 
 const fetchWithToken = async (url, token) => {
 

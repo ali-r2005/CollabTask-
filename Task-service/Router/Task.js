@@ -8,7 +8,8 @@ const upload = multer({ dest: 'uploads/' });
 const socket = require("socket.io-client")
 
 const sendNotification = (message, projectId) => {
-  const newSocket = socket.io("http://collaboration-service:3002");
+  const collabServiceUrl = process.env.COLLAB_SERVICE_URL || 'http://localhost:3002';
+  const newSocket = socket.io(collabServiceUrl);
   newSocket.emit("sendNotification", {message, projectId});
 };
 
@@ -58,29 +59,29 @@ router.get('/:id', authenticateToken, async (req, res) => {
 
 router.post('/', authenticateToken, async (req, res) => {
   try {
+      const authServiceUrl = process.env.AUTH_SERVICE_URL || 'http://localhost:3001';
+      const response = await axios.get(`${authServiceUrl}/auth/user/${req.user.id}`, {
+          headers: { 
+              'Authorization': req.header('Authorization')
+          }
+      });
 
-    const response = await axios.get(`http://localhost:3001/auth/user/${req.user.id}`, {
-        headers: { 
-            'Authorization': req.header('Authorization')
-        }
-    })
+      const assignedUser = response.data;
 
-    const assignedUser = response.data;
-
-    const task = new Task({
-      title: req.body.title,
-      description: req.body.description,
-      priority: req.body.priority || 'medium',
-      deadline: req.body.deadline,
-      status: req.body.status || 'to-do',
-      assignedTo: { _id: assignedUser._id, name: assignedUser.name },
-      projectId: req.body.projectId,
-    });
-    await task.save();
-    sendNotification('New task created', req.body.projectId);
-    res.status(201).json(task);
+      const task = new Task({
+          title: req.body.title,
+          description: req.body.description,
+          priority: req.body.priority || 'medium',
+          deadline: req.body.deadline,
+          status: req.body.status || 'to-do',
+          assignedTo: { _id: assignedUser._id, name: assignedUser.name },
+          projectId: req.body.projectId,
+      });
+      await task.save();
+      sendNotification('New task created', req.body.projectId);
+      res.status(201).json(task);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+      res.status(400).json({ message: error.message });
   }
 });
 

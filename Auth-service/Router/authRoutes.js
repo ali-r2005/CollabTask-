@@ -89,7 +89,7 @@ router.get('/users', authenticateToken , async (req, res) => {
 
 
 router.get("/user/:id" , authenticateToken, userAdmin, async (req, res) => {
-    try {
+    try {        
         const user = await User.findById(req.params.id);
         if (!user) return res.status(404).json({ message: "Utilisateur non trouvé" });
 

@@ -1,6 +1,5 @@
 const express = require("express");
 const router = express.Router();
-
 const projectModel = require("../Model/ProjectModel"); 
 const {authenticateToken} = require("../Middleware/Auth")
 const axios = require("axios")
@@ -30,32 +29,42 @@ router.get("/", authenticateToken, async (req, res) => {
 });
 
 // Create
-router.post("/", authenticateToken, async(req, res)=> {
-    try {        
-        const response = await axios.get(`http://localhost:3001/auth/user/${req.user.id}`, {
-            headers: { 
-                'Authorization': req.header('Authorization')
-            }
-        })
-
-        const user = response.data;
-        const project = new projectModel({
-          name: req.body.name,
-          description: req.body.description,
-          startDate: req.body.startDate,
-          endDate: req.body.endDate,
-          status: req.body.status || 'active',
-          categories: req.body.categories || [],
-          createdBy: { 
-                _id: user._id,
-                name: user.name },
+router.post("/", authenticateToken, async (req, res) => {
+    try {
+      const authServiceUrl = process.env.AUTH_SERVICE_URL || 'http://localhost:3001';  
+      let response;
+      try {
+        response = await axios.get(`${authServiceUrl}/auth/user/${req.user.id}`, {
+          headers: { 
+            'Authorization': req.header('Authorization')
+          }
         });
-        await project.save();
-        res.status(201).json(project);
-      } catch (error) {
-        res.status(400).json({ message: error.message });
+      } catch (axiosError) {
+        console.error('Axios error details:', {message: axiosError.message});
+        throw new Error(`Failed to fetch user: ${axiosError.message}`);
       }
-})
+  
+      const user = response.data;
+  
+      const project = new projectModel({
+        name: req.body.name,
+        description: req.body.description,
+        startDate: req.body.startDate,
+        endDate: req.body.endDate,
+        status: req.body.status || 'active',
+        categories: req.body.categories || [],
+        createdBy: { 
+          _id: user._id,
+          name: user.name 
+        },
+      });
+  
+      await project.save();
+      res.status(201).json(project);
+    } catch (error) {
+      res.status(400).json({message: 'Failed to create project', error: error.message});
+    }
+  });
 
 // Update
 router.put("/:id", authenticateToken, async(req, res)=> {

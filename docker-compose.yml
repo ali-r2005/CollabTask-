@@ -19,7 +19,7 @@ services:
     ports:
       - "3001:3001"
     environment:
-      - MONGO_URI=mongodb://mongo:27017/task_db
+      - MONGO_URI=mongodb://mongo:27017/authDB
       - PORT=3001
       - JWT_SECRET=like_this
     depends_on:
@@ -38,7 +38,7 @@ services:
     ports:
       - "3002:3002"
     environment:
-      - MONGO_URI=mongodb://mongo:27017/task_db
+      - MONGO_URI=mongodb://mongo:27017/collaborationDB
       - PORT=3002
     depends_on:
       - mongo
@@ -56,9 +56,10 @@ services:
     ports:
       - "3003:3003"
     environment:
-      - MONGO_URI=mongodb://mongo:27017/task_db
+      - MONGO_URI=mongodb://mongo:27017/project_db
       - PORT=3003
       - JWT_SECRET=like_this
+      - AUTH_SERVICE_URL=http://auth-service:3001
     depends_on:
       - mongo
       - auth-service
@@ -79,6 +80,8 @@ services:
       - MONGO_URI=mongodb://mongo:27017/task_db
       - PORT=3005
       - JWT_SECRET=like_this
+      - AUTH_SERVICE_URL=http://auth-service:3001
+      - COLLAB_SERVICE_URL=http://collaboration-service:3002
     depends_on:
       - mongo
       - auth-service
@@ -101,6 +104,9 @@ services:
     environment:
       - PORT=3004
       - JWT_SECRET=like_this
+      - AUTH_SERVICE_URL=http://auth-service:3001
+      - PROJECT_SERVICE_URL=http://project-service:3003
+      - TASK_SERVICE_URL=http://task-service:3005
     depends_on:
       - task-service
       - project-service
