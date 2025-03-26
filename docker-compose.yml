@@ -21,7 +21,7 @@ services:
     environment:
       - MONGO_URI=mongodb://mongo:27017/task_db
       - PORT=3001
-      - JWT_SECRET=like_that
+      - JWT_SECRET=like_this
     depends_on:
       - mongo
     networks:
@@ -36,10 +36,10 @@ services:
       dockerfile: Dockerfile
     container_name: collaboration-service
     ports:
-      - "3003:3003"
+      - "3002:3002"
     environment:
       - MONGO_URI=mongodb://mongo:27017/task_db
-      - PORT=3003
+      - PORT=3002
     depends_on:
       - mongo
     networks:
@@ -54,11 +54,11 @@ services:
       dockerfile: Dockerfile
     container_name: project-service
     ports:
-      - "3002:3002"
+      - "3003:3003"
     environment:
       - MONGO_URI=mongodb://mongo:27017/task_db
-      - PORT=3002
-      - JWT_SECRET=like_that
+      - PORT=3003
+      - JWT_SECRET=like_this
     depends_on:
       - mongo
       - auth-service
@@ -78,7 +78,7 @@ services:
     environment:
       - MONGO_URI=mongodb://mongo:27017/task_db
       - PORT=3005
-      - JWT_SECRET=like_that
+      - JWT_SECRET=like_this
     depends_on:
       - mongo
       - auth-service
@@ -100,7 +100,7 @@ services:
       - "3004:3004"
     environment:
       - PORT=3004
-      - JWT_SECRET=like_that
+      - JWT_SECRET=like_this
     depends_on:
       - task-service
       - project-service
