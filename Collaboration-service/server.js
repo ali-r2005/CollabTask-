@@ -37,7 +37,7 @@ io.on('connection', (socket) => {
         }
         const message = new Message({ sender, projectId, content });
         await message.save();
-        io.to(projectId).emit('receiveMessage', message);      
+        io.to(projectId).emit('receiveMessage', message);       
     });
 
     socket.on('sendNotification', (data) => {
