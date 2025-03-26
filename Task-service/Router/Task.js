@@ -1,26 +1,15 @@
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');
-const http = require("http");
-const { Server } = require("socket.io");
 const Task = require('../Model/TaskModel');
 const { authenticateToken } = require('../Middleware/Auth');
 const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
+const socket = require("socket.io-client")
 
-const server = http.createServer(app);
-const io = new Server(server, {
-  cors: {
-      origin: "*",
-      methods: ["GET", "POST"]
-  }
-});
-io.on("connection", (socket) => {
-  console.log("Client connected:", socket.id);
-});
-
-const sendNotification = (message,projectId) => {
-  io.to(projectId).emit("notification", message);
+const sendNotification = (message, projectId) => {
+  const newSocket = socket.io("http://collaboration-service:3002");
+  newSocket.emit("sendNotification", {message, projectId});
 };
 
 router.get('/reminders', authenticateToken, async (req, res) => {
