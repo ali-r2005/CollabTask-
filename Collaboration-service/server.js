@@ -34,7 +34,7 @@ io.on('connection', (socket) => {
         socket.join(projectId);
         const message = new Message({ sender, projectId, content });
         await message.save();
-        io.to(projectId).emit('receiveMessage', message);      
+        io.to(projectId).emit('receiveMessage', message);       
     });
 
     socket.on('disconnect', () => {
